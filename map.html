@@ -3,20 +3,12 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<title>湖南省违法案件地图展示——地图学期末大作业</title>
-		
+		<title>地图浏览</title>
 		<script src="support/jquery-3.2.1.min.js" type="text/javascript"></script>
-		
 		<link href="support/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css"/>
 		<script src="support/bootstrap/bootstrap.min.js" type="text/javascript"></script>
-		
-		<script src="support/echarts.js" type="text/javascript"></script>
-
 		<link href="support/openlayers/ol.css" rel="stylesheet" type="text/css"/>
 		<script src="support/openlayers/ol.js" type="text/javascript"></script>
-
-		<script src="support/openlayers_echart.es5.js" type="text/javascript"></script>
-
 		<link href="lib/map.css" rel="stylesheet" type="text/css"/>
 		<script src="lib/Connector.js" type="text/javascript"></script>
 		<script src="lib/Tools.js" type="text/javascript"></script>
@@ -24,12 +16,11 @@
 		<script src="lib/MapControl.js" type="text/javascript"></script>
 		<script src="lib/requests.js" type="text/javascript"></script>
 		<script src="lib/search.js" type="text/javascript"></script>
-
-		<script type="text/javascript" >
-
+		<script type="text/javascript">
 			var mapcontrol = null;
 			$(document).ready(function () {
 				$('form').on('submit', function (e) {
+//					e.preventDefault();
 					search();
 					return false;
 				});
@@ -42,101 +33,9 @@
 					target: "mapcontrol",
 					width: '100%',
 					height: '100%',
-					center: [112, 28],
-					zoom: 8
+					center: [110, 35],
+					zoom: 5
 				});
-
-	$.ajax({
-		url: "assets/湖南省行政区划.json",
-		method: "GET",
-		data: {},
-		success: function (geoCoordMap) {
-			
-			$.get('assets/湖南省违法案件按地区统计.json', function(data) {
-			
-				var convertData = function () {
-					var res = [];
-					var geoCoordMap_dict = {};
-					for (var i = 0; i < geoCoordMap.length; i++) {
-						if(geoCoordMap[i]["等级"] !== "street"){
-							geoCoordMap_dict[geoCoordMap[i]["行政区编号"]] = {
-								name: geoCoordMap[i]["行政区名称"],
-								coord: ol.proj.transform([parseFloat(geoCoordMap[i]["经度"]),parseFloat(geoCoordMap[i]["纬度"])], "EPSG:4326", "EPSG:3857")
-							};
-						}
-					}
-					for (var i = 0; i < data.length; i++) {
-						var geoCoord = geoCoordMap_dict[data[i]["现住地行政编号"]];
-						if (geoCoord) {
-							res.push({
-								name: geoCoord["name"],
-								value: geoCoord["coord"].concat(data[i]["案件数"])
-							});
-						}
-					}
-					return res;
-				};
-
-				option = {
-					title: {
-						text: '湖南省违法案件地图展示',
-						subtext: '数据来源：湖南阳光警务执法公开系统',
-						sublink: 'http://222.247.57.110:8099/ygjw/portal',
-						right: 'auto' ,
-						bottom: 30,
-						textStyle: {
-							color: '#FFF'
-						}
-					},
-					tooltip : {
-						trigger: 'item'
-					},
-					series : [
-						{
-							name: '违法案件数量',
-							type: 'effectScatter',
-							coordinateSystem: 'geo',
-							data: convertData(),
-							symbolSize: function (val) {
-								return val[2]/3;
-							},
-							encode: {
-								value: 2
-							},
-							showEffectOn: 'render',
-							rippleEffect: {
-								brushType: 'stroke'
-							},
-							hoverAnimation: true,
-							label: {
-								formatter: '{b}',
-								position: 'right',
-								show: true
-							},
-							itemStyle: {
-								color: 'red'
-							},
-							emphasis: {
-								label: {
-									show: true
-								}
-							}
-						}
-					]
-				};
-
-				var oe = new ADLayer(option, mapcontrol._Map, echarts);
-				oe._render();
-//			} else {
-//				alert(json.message);
-//			}
-			});
-		},
-		error: function () {
-			alert("无法连接至服务器!");
-		}
-	});
-
 				var id = getQueryVariable("id");
 				if(id){
 					mapcontrol.GotoPoint(id);
@@ -146,7 +45,7 @@
 		</script>
 		<style>
 			nav {
-				width: 75%;
+				width: 60%;
 				padding: 0 1em 0 1em;
 				margin: auto;
 			}
@@ -166,10 +65,10 @@
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
 					<li>
-						<a href="index.html" style="font-weight:bold;color:black">首页—专题展示</a>
+						<a href="index.html">首页—专题展示</a>
 					</li>
 					<li>
-						<a href="map.html">地图</a>
+						<a href="map.html" style="font-weight:bold;color:black">地图</a>
 					</li>
 					<li>
 						<a href="database.html">数据库</a>
@@ -204,28 +103,6 @@
 						</ul>
 					</li>
 				</ul>
-<!--				<form class="navbar-form navbar-left">
-					<div class="form-group">
-						<input id="tag" type="text" class="form-control" />
-						<input id="date" type="date" class="form-control" />
-					</div>
-					<div class="btn-group">
-						<button class="btn btn-default">查询设置</button><button data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="caret"></span></button>
-						<ul class="dropdown-menu">
-							<li>
-								<a onclick="toggleMapExtent()">只在地图视窗范围内搜索<span id="map_extent_on" class="check"> ✔</span></a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a onclick="reset()">重置查询条件</a>
-							</li>
-							<li>
-								<a onclick="ShowState()">显示当前查询条件</a>
-							</li>
-						</ul>
-					</div>
-					<button class="btn btn-default">查询</button>
-				</form>-->
 				<ul class="nav navbar-nav navbar-right">
 					<li>
 						<a href="about.html">关于我们</a>
@@ -233,8 +110,6 @@
 				</ul>
 			</div>
 		</nav>
-
 		<div id="mapcontrol"></div>
-		<div id="popup"></div>
 	</body>
 </html>
